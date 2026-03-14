@@ -430,19 +430,79 @@ function formatDate(d){
   return dt.toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric'});
 }
 
+// ── Mapping colonnes françaises → clés internes ──────
+const COL_MAP = {
+  // Horodateur ignoré
+  'numéro de suivi':          'tracking_id',
+  'numero de suivi':          'tracking_id',
+  'numéro de facture':        'invoice_number',
+  'numero de facture':        'invoice_number',
+  'nom du client':            'client_name',
+  'téléphone':                'phone',
+  'telephone':                'phone',
+  'ville de destination':     'destination_city',
+  'route':                    'route',
+  "mode d'envoi":             'shipping_method',
+  'mode d envoi':             'shipping_method',
+  'référence / conteneur':    'container_or_reference',
+  'reference / conteneur':    'container_or_reference',
+  'référence / conten':       'container_or_reference',
+  'date de départ':           'departure_date',
+  'date de depart':           'departure_date',
+  "date d'arrivée prévue":    'arrival_date',
+  "date d arrivee prevue":    'arrival_date',
+  'statut du colis':          'shipment_status',
+  'étape actuelle':           'current_step',
+  'etape actuelle':           'current_step',
+  'total transport':          'total_amount',
+  'montant payé':             'paid_amount',
+  'montant paye':             'paid_amount',
+  'reste à payer':            'balance',
+  'reste a payer':            'balance',
+  'statut paiement':          'payment_status',
+  'nombre de colis':          'packages',
+  'volume cbm':               'volume',
+  'poids':                    'weight',
+  'description des marchandises': 'description',
+  // Clés directes (si déjà en anglais)
+  'tracking_id':              'tracking_id',
+  'invoice_number':           'invoice_number',
+  'client_name':              'client_name',
+  'phone':                    'phone',
+  'destination_city':         'destination_city',
+  'shipping_method':          'shipping_method',
+  'container_or_reference':   'container_or_reference',
+  'departure_date':           'departure_date',
+  'arrival_date':             'arrival_date',
+  'shipment_status':          'shipment_status',
+  'current_step':             'current_step',
+  'total_amount':             'total_amount',
+  'paid_amount':              'paid_amount',
+  'balance':                  'balance',
+  'payment_status':           'payment_status',
+  'packages':                 'packages',
+  'volume':                   'volume',
+  'weight':                   'weight',
+  'description':              'description',
+};
+
 // ── Parsing CSV ───────────────────────────────────────
 function parseCSV(text){
   const lines=text.trim().split('\n');
   if(lines.length<2) return [];
-  const headers=lines[0].split(',').map(h=>h.trim().toLowerCase().replace(/\s+/g,'_'));
+  const rawHeaders=lines[0].split(',').map(h=>h.trim().replace(/^"|"$/g,''));
+  const headers=rawHeaders.map(h=>{
+    const key=h.toLowerCase().trim();
+    return COL_MAP[key] || key;
+  });
   return lines.slice(1).map(line=>{
     const values=[]; let cur='', inQ=false;
     for(const c of line){
       if(c==='"'){ inQ=!inQ; }
-      else if(c===','&&!inQ){ values.push(cur.trim()); cur=''; }
+      else if(c===','&&!inQ){ values.push(cur.trim().replace(/^"|"$/g,'')); cur=''; }
       else { cur+=c; }
     }
-    values.push(cur.trim());
+    values.push(cur.trim().replace(/^"|"$/g,''));
     const obj={};
     headers.forEach((h,i)=>{ obj[h]=values[i]||''; });
     return obj;

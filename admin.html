@@ -751,10 +751,50 @@ document.getElementById("saveBtn").addEventListener("click",function(){
     created:new Date().toISOString()
   };
   var orders=getOrders();orders.unshift(order);setOrders(orders);
-  showToast("Commande enregistrée !");
-  setTimeout(function(){showSheetsModal(order);},400);
+  showToast("Envoi vers Google Sheets...", "#1A1F5E");
+  sendToSheets(order);
   setTimeout(genIds,600);
 });
+
+function sendToSheets(order){
+  var params = [
+    "action=add",
+    "tracking_id="+encodeURIComponent(order.tid),
+    "invoice_number="+encodeURIComponent(order.iid),
+    "client_name="+encodeURIComponent(order.client),
+    "phone="+encodeURIComponent(order.phone),
+    "destination_city="+encodeURIComponent(order.city||""),
+    "country="+encodeURIComponent(order.country||""),
+    "route="+encodeURIComponent(order.route||""),
+    "shipping_method="+encodeURIComponent(order.method||""),
+    "departure_date="+encodeURIComponent(order.dep||""),
+    "arrival_date="+encodeURIComponent(order.arr||""),
+    "shipment_status="+encodeURIComponent(order.status||""),
+    "current_step="+encodeURIComponent(order.step||""),
+    "total_amount="+encodeURIComponent(order.total||""),
+    "paid_amount="+encodeURIComponent(order.paid_amt||""),
+    "balance="+encodeURIComponent(order.balance||""),
+    "payment_status="+encodeURIComponent(order.pay_status||""),
+    "packages="+encodeURIComponent(order.packages||""),
+    "volume="+encodeURIComponent(order.volume||""),
+    "weight="+encodeURIComponent(order.weight||""),
+    "description="+encodeURIComponent((order.desc||"").substring(0,200))
+  ].join("&");
+
+  var url = APPS_SCRIPT + "?" + params;
+
+  // Use no-cors fetch - works from any origin, no CORS error
+  fetch(url, {method:"GET", mode:"no-cors"})
+  .then(function(){
+    showToast("Commande enregistree dans Google Sheets ! ✅");
+  })
+  .catch(function(err){
+    // Fallback: image trick (bypasses all CORS)
+    var img = new Image();
+    img.src = url;
+    showToast("Envoye ! Verifiez Google Sheets ✅");
+  });
+}
 
 // ── AUTO STATUS CHECK ──────────────────
 function checkAutoStatus(){

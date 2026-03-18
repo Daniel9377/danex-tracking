@@ -192,7 +192,19 @@ body{font-family:"DM Sans",sans-serif;background:var(--g1);color:var(--g9);min-h
 .export-sub{font-size:11px;color:var(--g4);}
 
 @media(max-width:900px){.dash-grid{grid-template-columns:repeat(2,1fr);}.fgrid{grid-template-columns:1fr;}.fg.full{grid-column:span 1;}}
-@media(max-width:600px){.dash-grid{grid-template-columns:1fr 1fr;}.anav{display:none;}.otable td,.otable th{padding:8px 8px;font-size:11px;}}
+@media(max-width:600px){
+  .dash-grid{grid-template-columns:1fr 1fr;}
+  .anav{display:none;}
+  .otable td,.otable th{padding:8px 6px;font-size:11px;}
+  .amain{padding:16px 12px 100px;}
+}
+/* Mobile bottom nav */
+.mob-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--w);border-top:2px solid var(--g2);z-index:300;padding:8px 4px;}
+.mob-nav-inner{display:flex;justify-content:space-around;}
+.mob-btn{display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;cursor:pointer;padding:6px 10px;border-radius:var(--rs);font-family:"DM Sans",sans-serif;color:var(--g4);font-size:10px;font-weight:600;transition:all .15s;min-width:60px;}
+.mob-btn.active{color:var(--o);}
+.mob-btn-icon{font-size:20px;line-height:1;}
+@media(max-width:600px){.mob-nav{display:block;}}
 </style>
 </head>
 <body>
@@ -266,8 +278,11 @@ body{font-family:"DM Sans",sans-serif;background:var(--g1);color:var(--g9);min-h
       <!-- Recent orders preview -->
       <div class="card">
         <div class="ctitle">
-          <div class="ctitle-left">Commandes récentes</div>
-          <button class="btn bto" style="font-size:11px;padding:6px 12px;" id="btnViewAll">Voir toutes →</button>
+          <div class="ctitle-left">Commandes recentes</div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btb" id="dashSyncBtn" style="font-size:11px;padding:6px 12px;">🔄 Sync Sheets</button>
+            <button class="btn bto" style="font-size:11px;padding:6px 12px;" id="btnViewAll">Voir toutes →</button>
+          </div>
         </div>
         <div id="dashOrdersPreview"></div>
       </div>
@@ -413,11 +428,15 @@ body{font-family:"DM Sans",sans-serif;background:var(--g1);color:var(--g9);min-h
     <!-- ══ COMMANDES ══ -->
     <div id="tabAll" class="tp">
       <div class="card" style="padding:14px 18px;margin-bottom:14px;">
+        <div style="display:flex;gap:10px;align-items:center;margin-bottom:10px;">
+          <button class="btn btb" id="syncSheetsBtn" style="font-size:12px;padding:8px 14px;">🔄 Sync Google Sheets</button>
+          <span style="font-size:11px;color:var(--g4);">Cliquez pour charger les commandes ajoutees depuis votre telephone ou directement dans Sheets</span>
+        </div>
         <div class="search-bar-wrap" style="margin-bottom:0;">
           <span class="search-bar-icon">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
           </span>
-          <input type="text" id="searchBar" class="search-bar" placeholder="Rechercher par N° suivi, facture, nom, téléphone..."/>
+          <input type="text" id="searchBar" class="search-bar" placeholder="Rechercher par N° suivi, facture, nom, telephone..."/>
         </div>
       </div>
       <div class="card">
@@ -471,12 +490,32 @@ body{font-family:"DM Sans",sans-serif;background:var(--g1);color:var(--g9);min-h
   </div>
 </div>
 
+<!-- Mobile bottom navigation -->
+<div class="mob-nav" id="mobNav">
+  <div class="mob-nav-inner">
+    <button class="mob-btn active" id="mob-dash">
+      <span class="mob-btn-icon">📊</span>Dashboard
+    </button>
+    <button class="mob-btn" id="mob-new">
+      <span class="mob-btn-icon">➕</span>Nouveau
+    </button>
+    <button class="mob-btn" id="mob-all">
+      <span class="mob-btn-icon">📋</span>Commandes
+    </button>
+    <button class="mob-btn" id="mob-export">
+      <span class="mob-btn-icon">📤</span>Export
+    </button>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
 (function(){
 
 var PASS = "Mbolela2002";
+var APPS_SCRIPT = "https://script.google.com/macros/s/AKfycby7ztHArcOGucDD4ZObVUylJXC8hCwOhgcsNHLWHK6oeSyc7knwAjj5do3ST3hLCbj0ng/exec";
+var SHEET_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTQAH2NElJ3aUGXVgsCpsncIs4TT7oq8-BxyAlX6HiVb3fzPFs_vlBHP3hWes7Ont8-TqM2H8hpiVlx/pub?gid=0&single=true&output=csv";
 var SITE = "https://danexcargo.com";
 var SHEETS_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTQAH2NElJ3aUGXVgsCpsncIs4TT7oq8-BxyAlX6HiVb3fzPFs_vlBHP3hWes7Ont8-TqM2H8hpiVlx/pub?gid=0&single=true&output=csv";
 
@@ -512,11 +551,16 @@ tabs.forEach(function(t){
     document.getElementById(t[0]).classList.add("active");
     document.getElementById(t[1]).classList.add("active");
     if(t[1]==="tabDash") refreshDash();
-    if(t[1]==="tabAll"){currentFilter="all";renderOrders();};
+    if(t[1]==="tabAll"){currentFilter="all";loadFromSheets();};
   });
 });
 document.getElementById("btnViewAll").addEventListener("click",function(){
   document.getElementById("btnAll").click();
+});
+document.getElementById("syncSheetsBtn").addEventListener("click", loadFromSheets);
+document.getElementById("dashSyncBtn").addEventListener("click", function(){
+  loadFromSheets();
+  setTimeout(refreshDash, 2000);
 });
 
 // ── INIT ──────────────────────────────
@@ -770,6 +814,64 @@ function filterOrders(filter){
 }
 
 // ── ORDERS LIST ───────────────────────
+// ── LOAD FROM GOOGLE SHEETS ──────────────
+function loadFromSheets(){
+  showToast("Chargement depuis Google Sheets...", "#1A1F5E");
+  fetch(SHEET_CSV + "&t=" + Date.now())
+  .then(function(r){ return r.text(); })
+  .then(function(text){
+    var rows = parseSheetCSV(text);
+    if(!rows.length){ showToast("Google Sheets vide ou erreur", "#EF4444"); return; }
+    // Merge: keep local orders not in sheets, add sheet orders
+    var localOrders = getOrders();
+    var sheetTids = rows.map(function(r){ return r.tid; });
+    // Add sheet rows that are not in local
+    var merged = rows.slice();
+    localOrders.forEach(function(o){
+      if(!sheetTids.includes(o.tid)) merged.push(o);
+    });
+    setOrders(merged);
+    renderOrders();
+    refreshDash();
+    showToast("Synchronise depuis Google Sheets (" + rows.length + " commandes) ✅");
+  })
+  .catch(function(){
+    showToast("Impossible de charger Google Sheets", "#EF4444");
+  });
+}
+
+function parseSheetCSV(text){
+  var lines = text.trim().split("\n");
+  if(lines.length < 2) return [];
+  var headers = lines[0].split(",").map(function(h){
+    return h.trim().replace(/"/g,"").toLowerCase().trim();
+  });
+  var COL = {
+    "tracking_id":"tid","invoice_number":"iid","client_name":"client",
+    "phone":"phone","destination_city":"city","country":"country",
+    "route":"route","shipping_method":"method","departure_date":"dep",
+    "arrival_date":"arr","shipment_status":"status","current_step":"step",
+    "total_amount":"total","paid_amount":"paid_amt","balance":"balance",
+    "payment_status":"pay_status","packages":"packages","volume":"volume",
+    "weight":"weight","description":"desc"
+  };
+  return lines.slice(1).filter(function(l){ return l.trim(); }).map(function(line){
+    var vals=[],cur="",inQ=false;
+    for(var c of line){
+      if(c==='"'){inQ=!inQ;}
+      else if(c===","&&!inQ){vals.push(cur.trim().replace(/"/g,""));cur="";}
+      else{cur+=c;}
+    }
+    vals.push(cur.trim().replace(/"/g,""));
+    var obj={arts:[],sub:0,ap:0,af:0,date:"",created:new Date().toISOString()};
+    headers.forEach(function(h,i){
+      var key=COL[h]||h;
+      obj[key]=vals[i]||"";
+    });
+    return obj;
+  }).filter(function(o){ return o.tid; });
+}
+
 function renderOrders(){
   var orders=getOrders();
   var search=document.getElementById("searchBar").value.toLowerCase().trim();
@@ -1014,7 +1116,7 @@ function deleteOrder(i){
 }
 
 // ── SHEETS MODAL ──────────────────────
-function showSheetsModal(o){
+function showSheetsManualModal(o){
   var cols=[
     ["tracking_id",o.tid],["invoice_number",o.iid],["client_name",o.client],
     ["phone",o.phone],["destination_city",o.city],["country",o.country],
@@ -1131,6 +1233,19 @@ document.getElementById("clearDateFilter").addEventListener("click",function(){
 });
 
 // ── RESET ─────────────────────────────
+// Mobile nav
+var mobMap = [
+  ["mob-dash","btnDash"],["mob-new","btnNew"],
+  ["mob-all","btnAll"],["mob-export","btnExport"]
+];
+mobMap.forEach(function(m){
+  document.getElementById(m[0]).addEventListener("click",function(){
+    document.getElementById(m[1]).click();
+    mobMap.forEach(function(x){ document.getElementById(x[0]).classList.remove("active"); });
+    this.classList.add("active");
+  });
+});
+
 document.getElementById("resetBtn").addEventListener("click",function(){
   if(!confirm("Reinitialiser le formulaire ?")) return;
   ["fClient","fPhone","fCity","fRoute","fArr","fNotes","fWeight","fVolume","fRef"].forEach(function(id){document.getElementById(id).value="";});

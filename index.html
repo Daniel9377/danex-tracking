@@ -262,49 +262,42 @@ var SITE_URL = "https://danexcargo.com";
 // ── TIMELINES ──
 var TL = {
   "Aerien Standard":[
-    {i:"📋",t:"Commande reçue",d:"Votre commande est enregistrée"},
-    {i:"📦",t:"Marchandises en entrepôt",d:"Cargaison stockée à l'entrepôt Chine"},
-    {i:"✈️",t:"Vol programmé",d:"Vol réservé, cargaison préparée"},
-    {i:"🛫",t:"En transit aérien",d:"Cargaison en vol vers la RDC"},
-    {i:"🛬",t:"Arrivée à Lubumbashi",d:"Cargaison posée, dédouanement en cours"},
-    {i:"✅",t:"Prêt à récupérer",d:"Votre colis est disponible – contactez DANEX"}
+    {i:"📋",t:"Commande recue",d:"Votre commande est enregistree dans notre systeme"},
+    {i:"📦",t:"Marchandises en entrepot",d:"Cargaison stockee a l entrepot en Chine"},
+    {i:"✈️",t:"Vol programme",d:"Vol reserve, cargaison preparee pour expedition"},
+    {i:"🛫",t:"En vol",d:"Cargaison en vol vers la RDC"},
+    {i:"🛬",t:"Arrivee a destination",d:"Cargaison posee, dedouanement en cours"},
+    {i:"📦",t:"Pret a recuperer",d:"Votre colis est disponible — contactez DANEX"},
+    {i:"✅",t:"Livre",d:"Colis remis au destinataire"}
   ],
   "Aerien Express":[
-    {i:"📋",t:"Commande reçue",d:"Votre commande est enregistrée"},
-    {i:"📦",t:"Marchandises en entrepôt",d:"Cargaison collectée en priorité express"},
-    {i:"⚡",t:"Traitement express",d:"Priorité absolue – vol le plus proche réservé"},
-    {i:"🛫",t:"En transit aérien express",d:"Cargaison en vol express vers la RDC"},
-    {i:"🛬",t:"Arrivée à Lubumbashi",d:"Dédouanement prioritaire"},
-    {i:"✅",t:"Prêt à récupérer",d:"Votre colis est disponible – contactez DANEX"}
+    {i:"📋",t:"Commande recue",d:"Votre commande est enregistree dans notre systeme"},
+    {i:"📦",t:"Marchandises en entrepot",d:"Cargaison collectee en priorite express"},
+    {i:"⚡",t:"Traitement express",d:"Vol express reserve en priorite absolue"},
+    {i:"🛫",t:"En vol express",d:"Cargaison en vol express vers la RDC"},
+    {i:"🛬",t:"Arrivee a destination",d:"Dedouanement prioritaire"},
+    {i:"📦",t:"Pret a recuperer",d:"Votre colis est disponible — contactez DANEX"},
+    {i:"✅",t:"Livre",d:"Colis remis au destinataire"}
   ],
   "Maritime Standard":[
-    {i:"📋",t:"Commande reçue",d:"Votre commande est enregistrée"},
-    {i:"📦",t:"Marchandises en entrepôt",d:"Cargaison stockée à l'entrepôt"},
-    {i:"🏗️",t:"Chargement conteneur",d:"Marchandises chargées dans le conteneur"},
-    {i:"🚢",t:"Navire parti",d:"Le navire a quitté le port d'origine"},
-    {i:"🌊",t:"En transit maritime",d:"Cargaison en mer vers l'Afrique"},
-    {i:"⚓",t:"Arrivée au port",d:"Navire arrivé, dédouanement en cours"},
-    {i:"✅",t:"Prêt à récupérer",d:"Votre colis est disponible – contactez DANEX"}
+    {i:"📋",t:"Commande recue",d:"Votre commande est enregistree dans notre systeme"},
+    {i:"📦",t:"Marchandises en entrepot",d:"Cargaison stockee a l entrepot"},
+    {i:"🏗️",t:"Chargement conteneur",d:"Marchandises chargees dans le conteneur"},
+    {i:"🚢",t:"Navire parti",d:"Le navire a quitte le port d origine"},
+    {i:"🌊",t:"En mer",d:"Cargaison en mer vers l Afrique"},
+    {i:"⚓",t:"Arrivee a destination",d:"Navire arrive, dedouanement en cours"},
+    {i:"📦",t:"Pret a recuperer",d:"Votre colis est disponible — contactez DANEX"},
+    {i:"✅",t:"Livre",d:"Colis remis au destinataire"}
   ],
   "Maritime Express":[
-    {i:"📋",t:"Commande reçue",d:"Votre commande est enregistrée"},
-    {i:"📦",t:"Marchandises en entrepôt",d:"Cargaison collectée en priorité express"},
+    {i:"📋",t:"Commande recue",d:"Votre commande est enregistree dans notre systeme"},
+    {i:"📦",t:"Marchandises en entrepot",d:"Cargaison collectee en priorite express"},
     {i:"🏗️",t:"Chargement prioritaire",d:"Chargement en conteneur express"},
-    {i:"🚢",t:"Navire express parti",d:"Navire express a quitté le port"},
-    {i:"🌊",t:"En transit maritime express",d:"Délai réduit, itinéraire optimisé"},
-    {i:"⚓",t:"Arrivée au port",d:"Navire arrivé, dédouanement prioritaire"},
-    {i:"✅",t:"Prêt à récupérer",d:"Votre colis est disponible – contactez DANEX"}
-  ],
-  "Express via Tanzanie":[
-    {i:"📋",t:"Commande reçue",d:"Votre commande est enregistrée"},
-    {i:"📦",t:"Marchandises en entrepôt",d:"Cargaison stockée à l'entrepôt"},
-    {i:"🏗️",t:"Chargement conteneur",d:"Marchandises chargées dans le conteneur"},
-    {i:"🚢",t:"Navire parti de Chine",d:"Le navire a quitté le port chinois"},
-    {i:"🌊",t:"En transit vers la Tanzanie",d:"Cargaison traverse l'océan Indien"},
-    {i:"⚓",t:"Arrivée port de Tanzanie",d:"Navire arrivé à Dar es Salaam"},
-    {i:"🚛",t:"En transit vers la RDC",d:"Transport routier depuis la Tanzanie"},
-    {i:"🏙️",t:"Arrivée à Lubumbashi",d:"Cargaison arrivée à Lubumbashi"},
-    {i:"✅",t:"Prêt à récupérer",d:"Votre colis est disponible – contactez DANEX"}
+    {i:"🚢",t:"Navire express parti",d:"Navire express a quitte le port"},
+    {i:"🌊",t:"En mer express",d:"Itineraire optimise, delai reduit"},
+    {i:"⚓",t:"Arrivee a destination",d:"Navire arrive, dedouanement prioritaire"},
+    {i:"📦",t:"Pret a recuperer",d:"Votre colis est disponible — contactez DANEX"},
+    {i:"✅",t:"Livre",d:"Colis remis au destinataire"}
   ]
 };
 
@@ -440,9 +433,8 @@ function renderPayment(s){
 function renderTimeline(method,currentStep){
   var m=(method||"").toLowerCase();
   var key="Maritime Standard";
-  if(m.includes("aerien express")||m.includes("aérien express")) key="Aerien Express";
+  if(m.includes("aerien express")||m.includes("aérien express")||m.includes("express")&&m.includes("aer")) key="Aerien Express";
   else if(m.includes("aerien")||m.includes("aérien")||m.includes("air")) key="Aerien Standard";
-  else if(m.includes("tanzanie")||m.includes("tanzania")) key="Express via Tanzanie";
   else if(m.includes("maritime express")||m.includes("express")) key="Maritime Express";
   var steps=TL[key]||TL["Maritime Standard"];
   var c=document.getElementById("timelineDiv");

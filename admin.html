@@ -372,40 +372,33 @@ body{font-family:"DM Sans",sans-serif;background:var(--g1);color:var(--g9);min-h
         </div>
       </div>
 
-      <!-- Articles -->
+      <!-- Frais de transport -->
       <div class="card">
-        <div class="ctitle"><div class="ctitle-left">Articles Commandés</div></div>
-        <table class="atable">
-          <thead><tr><th style="width:45%">Description</th><th style="width:15%">Qté</th><th style="width:20%">Prix ($)</th><th style="width:15%">Total ($)</th><th style="width:5%"></th></tr></thead>
-          <tbody id="artBody">
-            <tr>
-              <td><input type="text" class="ai adesc" placeholder="Ex: Sac plastique 15x20cm"/></td>
-              <td><input type="number" class="ai aqty" placeholder="0" min="0"/></td>
-              <td><input type="number" class="ai aprice" placeholder="0.00" step="0.001"/></td>
-              <td class="atotal" style="font-weight:700;color:var(--b)">0.00</td>
-              <td><button class="rmrow">×</button></td>
-            </tr>
-          </tbody>
-        </table>
-        <button class="addbtn" id="addRowBtn">+ Ajouter un article</button>
-        <div class="tbox">
-          <div class="trow"><span>Sous-total (HT)</span><span id="tSub">0.00 $</span></div>
-          <div class="trow"><span>Frais agent (<span id="tAgPct">0</span>%)</span><span id="tAgFee">0.00 $</span></div>
-          <div class="trow bold"><span>TOTAL TTC</span><span id="tTotal">0.00 $</span></div>
+        <div class="ctitle"><div class="ctitle-left">Frais de Transport DANEX</div></div>
+        <div class="fgrid">
+          <div class="fg">
+            <label class="flabel">Total Transport (USD) *</label>
+            <input type="number" id="fTotal" class="fi" placeholder="Ex: 150" min="0" step="0.01"/>
+          </div>
+          <div class="fg">
+            <label class="flabel">Montant Payé (USD)</label>
+            <input type="number" id="fPaid" class="fi" placeholder="Ex: 100" min="0" step="0.01" value="0"/>
+          </div>
         </div>
-        <div class="fgrid" style="margin-top:12px;">
-          <div class="fg"><label class="flabel">Frais agent %</label><input type="number" id="fAgPct" class="fi" value="0" min="0" max="100"/></div>
-          <div class="fg"><label class="flabel">Montant payé ($)</label><input type="number" id="fPaid" class="fi" value="0" min="0" step="0.01"/></div>
-        </div>
-        <div class="tbox" style="margin-top:8px;">
+        <div class="tbox" style="margin-top:12px;">
           <div class="trow grn"><span>Montant payé</span><span id="tPaidDisp">0.00 $</span></div>
           <div class="trow red"><span>Reste à payer</span><span id="tBal">0.00 $</span></div>
-          <div class="trow">
-            <span>Mode paiement</span>
-            <select id="fPayM" class="fs" style="width:auto;padding:5px 10px;font-size:12px;">
-              <option>Mobile Money</option><option>Virement bancaire</option><option>Cash</option><option>PayPal</option><option>Western Union</option>
-            </select>
-          </div>
+          <div class="trow bold"><span>Total Transport</span><span id="tTotal_disp">0.00 $</span></div>
+        </div>
+        <div class="fg" style="margin-top:12px;">
+          <label class="flabel">Mode de paiement</label>
+          <select id="fPayM" class="fs">
+            <option>Mobile Money</option>
+            <option>Virement bancaire</option>
+            <option>Cash</option>
+            <option>PayPal</option>
+            <option>Western Union</option>
+          </select>
         </div>
       </div>
 
@@ -650,60 +643,19 @@ function getTotalSpentNum(orders){
   return orders.reduce(function(s,o){return s+parseFloat((o.total||"0").replace(/[^0-9.]/g,""));},0);
 }
 
-// ── ARTICLES ──────────────────────────
-function calcRow(row){
-  var q=parseFloat(row.querySelector(".aqty").value)||0;
-  var p=parseFloat(row.querySelector(".aprice").value)||0;
-  row.querySelector(".atotal").textContent=(q*p).toFixed(2);
-  recalc();
-}
-function recalc(){
-  var sub=0;
-  document.querySelectorAll("#artBody tr").forEach(function(r){sub+=parseFloat(r.querySelector(".atotal").textContent)||0;});
-  var ap=parseFloat(document.getElementById("fAgPct").value)||0;
-  var af=sub*ap/100,tot=sub+af;
+// ── TRANSPORT FEES ────────────────────
+function recalcTransport(){
+  var tot=parseFloat(document.getElementById("fTotal").value)||0;
   var paid=parseFloat(document.getElementById("fPaid").value)||0;
   var bal=Math.max(0,tot-paid);
-  document.getElementById("tSub").textContent=sub.toFixed(2)+" $";
-  document.getElementById("tAgPct").textContent=ap;
-  document.getElementById("tAgFee").textContent=af.toFixed(2)+" $";
-  document.getElementById("tTotal").textContent=tot.toFixed(2)+" $";
   document.getElementById("tPaidDisp").textContent=paid.toFixed(2)+" $";
   document.getElementById("tBal").textContent=bal.toFixed(2)+" $";
+  document.getElementById("tTotal_disp").textContent=tot.toFixed(2)+" $";
 }
-function makeRow(){
-  var tr=document.createElement("tr");
-  tr.innerHTML='<td><input type="text" class="ai adesc" placeholder="Description"/></td>'
-    +'<td><input type="number" class="ai aqty" placeholder="0" min="0"/></td>'
-    +'<td><input type="number" class="ai aprice" placeholder="0.00" step="0.001"/></td>'
-    +'<td class="atotal" style="font-weight:700;color:var(--b)">0.00</td>'
-    +'<td><button class="rmrow">×</button></td>';
-  attachRow(tr);return tr;
-}
-function attachRow(row){
-  row.querySelector(".aqty").addEventListener("input",function(){calcRow(row);});
-  row.querySelector(".aprice").addEventListener("input",function(){calcRow(row);});
-  row.querySelector(".rmrow").addEventListener("click",function(){
-    if(document.querySelectorAll("#artBody tr").length>1){row.remove();recalc();}
-  });
-}
-attachRow(document.querySelector("#artBody tr"));
-document.getElementById("addRowBtn").addEventListener("click",function(){
-  document.getElementById("artBody").appendChild(makeRow());
-});
-document.getElementById("fAgPct").addEventListener("input",recalc);
-document.getElementById("fPaid").addEventListener("input",recalc);
+document.getElementById("fTotal").addEventListener("input",recalcTransport);
+document.getElementById("fPaid").addEventListener("input",recalcTransport);
 
-function getArts(){
-  var items=[];
-  document.querySelectorAll("#artBody tr").forEach(function(r){
-    var d=r.querySelector(".adesc").value.trim();
-    var q=parseFloat(r.querySelector(".aqty").value)||0;
-    var p=parseFloat(r.querySelector(".aprice").value)||0;
-    if(d) items.push({desc:d,qty:q,price:p,total:q*p});
-  });
-  return items;
-}
+function getArts(){ return []; }
 
 // ── STORAGE ──────────────────────────
 function getOrders(){return JSON.parse(localStorage.getItem("dnx_orders")||"[]");}
@@ -717,12 +669,11 @@ document.getElementById("saveBtn").addEventListener("click",function(){
   var tid=document.getElementById("genTID").textContent;
   var iid=document.getElementById("genIID").value.trim();
   if(tid==="---"){showToast("Regenerez les IDs d abord","#EF4444");return;}
-  var arts=getArts();
-  var sub=arts.reduce(function(s,a){return s+a.total;},0);
-  var ap=parseFloat(document.getElementById("fAgPct").value)||0;
-  var af=sub*ap/100,tot=sub+af;
+  var arts=[];
+  var tot=parseFloat(document.getElementById("fTotal").value)||0;
   var paid=parseFloat(document.getElementById("fPaid").value)||0;
   var bal=Math.max(0,tot-paid);
+  var sub=tot; var ap=0; var af=0;
   var order={
     tid:tid,iid:iid,
     client:client,phone:phone,
@@ -741,7 +692,7 @@ document.getElementById("saveBtn").addEventListener("click",function(){
     balance:"USD "+bal.toFixed(2),
     pay_status:bal<=0?"Paid":paid>0?"Partially Paid":"Not Paid",
     pay_method:document.getElementById("fPayM").value,
-    packages:arts.length+" articles",
+    packages:"",
     weight:document.getElementById("fWeight").value.trim(),
     volume:document.getElementById("fVolume").value.trim(),
     desc:arts.map(function(a){return a.desc;}).join(", "),
@@ -751,49 +702,57 @@ document.getElementById("saveBtn").addEventListener("click",function(){
     created:new Date().toISOString()
   };
   var orders=getOrders();orders.unshift(order);setOrders(orders);
-  showToast("Envoi vers Google Sheets...", "#1A1F5E");
-  sendToSheets(order);
-  setTimeout(genIds,600);
+  showToast("Commande enregistree !");
+  setTimeout(function(){ showCopyModal(order); }, 400);
+  setTimeout(genIds, 600);
 });
 
-function sendToSheets(order){
-  var params = [
-    "action=add",
-    "tracking_id="+encodeURIComponent(order.tid),
-    "invoice_number="+encodeURIComponent(order.iid),
-    "client_name="+encodeURIComponent(order.client),
-    "phone="+encodeURIComponent(order.phone),
-    "destination_city="+encodeURIComponent(order.city||""),
-    "country="+encodeURIComponent(order.country||""),
-    "route="+encodeURIComponent(order.route||""),
-    "shipping_method="+encodeURIComponent(order.method||""),
-    "departure_date="+encodeURIComponent(order.dep||""),
-    "arrival_date="+encodeURIComponent(order.arr||""),
-    "shipment_status="+encodeURIComponent(order.status||""),
-    "current_step="+encodeURIComponent(order.step||""),
-    "total_amount="+encodeURIComponent(order.total||""),
-    "paid_amount="+encodeURIComponent(order.paid_amt||""),
-    "balance="+encodeURIComponent(order.balance||""),
-    "payment_status="+encodeURIComponent(order.pay_status||""),
-    "packages="+encodeURIComponent(order.packages||""),
-    "volume="+encodeURIComponent(order.volume||""),
-    "weight="+encodeURIComponent(order.weight||""),
-    "description="+encodeURIComponent((order.desc||"").substring(0,200))
-  ].join("&");
-
-  var url = APPS_SCRIPT + "?" + params;
-
-  // Use no-cors fetch - works from any origin, no CORS error
-  fetch(url, {method:"GET", mode:"no-cors"})
-  .then(function(){
-    showToast("Commande enregistree dans Google Sheets ! ✅");
-  })
-  .catch(function(err){
-    // Fallback: image trick (bypasses all CORS)
-    var img = new Image();
-    img.src = url;
-    showToast("Envoye ! Verifiez Google Sheets ✅");
+function showCopyModal(order){
+  var cols=[
+    order.tid, order.iid, order.client, order.phone,
+    order.city||"", order.country||"", order.route||"",
+    order.method||"", order.dep||"", order.arr||"",
+    order.status||"", order.step||"", order.total||"",
+    order.paid_amt||"", order.balance||"", order.pay_status||"",
+    order.packages||"", order.volume||"", order.weight||"",
+    order.desc||""
+  ];
+  var tabVals=cols.join("\t");
+  try{navigator.clipboard.writeText(tabVals);}catch(e){
+    var ta=document.createElement("textarea");
+    ta.value=tabVals;ta.style.position="fixed";ta.style.opacity="0";
+    document.body.appendChild(ta);ta.select();
+    document.execCommand("copy");document.body.removeChild(ta);
+  }
+  var box=document.createElement("div");
+  box.className="modal-bg";box.id="copyModal";
+  var h="<div class='modal-box' style='text-align:center;'>";
+  h+="<div style='font-size:44px;margin-bottom:10px;'>📋</div>";
+  h+="<div class='modal-title' style='justify-content:center;margin-bottom:8px;'>Ligne copiee !</div>";
+  h+="<div style='font-size:13px;color:var(--g6);margin-bottom:18px;line-height:1.8;'>";
+  h+="1. Cliquez <strong>Ouvrir Google Sheets</strong><br/>";
+  h+="2. Cliquez sur la <strong>premiere cellule vide</strong> (colonne A)<br/>";
+  h+="3. Collez : <strong>Ctrl+V</strong> sur PC &nbsp;|&nbsp; Appui long → Coller sur telephone";
+  h+="</div>";
+  h+="<div style='background:var(--bl);border-radius:var(--rs);padding:12px;font-size:12px;color:var(--b);margin-bottom:18px;text-align:left;border-left:3px solid var(--b);'>";
+  h+="<strong>"+order.tid+"</strong><br/>"+order.client+" | "+order.total;
+  h+="</div>";
+  h+="<div class='mbtns'>";
+  h+="<button class='mbtn mbtn-o' id='cpBtn'>📋 Recopier</button>";
+  h+="<a href='https://docs.google.com/spreadsheets' target='_blank' class='mbtn' style='background:#0F9D58;color:#fff;display:flex;align-items:center;justify-content:center;border-radius:8px;font-weight:700;font-size:12px;text-decoration:none;'>📊 Ouvrir Sheets</a>";
+  h+="<button class='mbtn mbtn-gr' id='clBtn'>Fermer</button>";
+  h+="</div></div>";
+  box.innerHTML=h;
+  document.body.appendChild(box);
+  document.getElementById("cpBtn").addEventListener("click",function(){
+    try{navigator.clipboard.writeText(tabVals);}catch(e){
+      var ta=document.createElement("textarea");ta.value=tabVals;ta.style.position="fixed";ta.style.opacity="0";
+      document.body.appendChild(ta);ta.select();document.execCommand("copy");document.body.removeChild(ta);
+    }
+    showToast("Recopie ! Collez dans Sheets ✅");
   });
+  document.getElementById("clBtn").addEventListener("click",function(){box.remove();});
+  box.addEventListener("click",function(e){if(e.target===box)box.remove();});
 }
 
 // ── AUTO STATUS CHECK ──────────────────
@@ -1290,14 +1249,12 @@ document.getElementById("resetBtn").addEventListener("click",function(){
   if(!confirm("Reinitialiser le formulaire ?")) return;
   ["fClient","fPhone","fCity","fRoute","fArr","fNotes","fWeight","fVolume","fRef"].forEach(function(id){document.getElementById(id).value="";});
   document.getElementById("fCountry").value="DR Congo";
+  document.getElementById("fTotal").value="";
   document.getElementById("fPaid").value="0";
-  document.getElementById("fAgPct").value="0";
   document.getElementById("fStep").value="1";
   document.getElementById("stepDisp").textContent="Étape 1";
   document.getElementById("clientLevelBadge").innerHTML="";
-  var tbody=document.getElementById("artBody");
-  tbody.innerHTML="";tbody.appendChild(makeRow());
-  recalc();genIds();
+  recalcTransport();genIds();
 });
 
 // ── TOAST ─────────────────────────────
